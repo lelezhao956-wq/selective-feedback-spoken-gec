@@ -1,0 +1,11 @@
+# Portability patch to the official Speak & Improve Challenge 2025 baseline (distributed with the
+# Speak & Improve Corpus 2025 data set; file headers "Copyright: S&I Challenge 2024", no licence stated).
+# Because the licence of the official code is not stated, this diff has zero context lines (diff -U0): it holds only the
+# changed lines (old line(s) "-", our replacement(s) "+"), not the surrounding official code. Apply to the unmodified file
+# from the official zip: patch -p0 -b < <this file>   (patch ignores these header lines). The "-" lines remain the
+# property of their owner; only the "+" lines are our work (CC BY 4.0).
+--- ./scoring-tools/run-scripts/run-wer-scoring.sh.orig
++++ ./scoring-tools/run-scripts/run-wer-scoring.sh
+@@ -169 +169 @@
+-$tools_dir/sctk-2.4.9/bin/sclite -r "$ref_file" stm -h "$hyp_file" ctm -F -D -o sum rsum sgml lur dtl pra |& tee $LOG
++$tools_dir/sctk-2.4.9/bin/sclite -r "$ref_file" stm -h "$hyp_file" ctm -F -D -o sum rsum sgml lur dtl pra 2>&1 | tee $LOG

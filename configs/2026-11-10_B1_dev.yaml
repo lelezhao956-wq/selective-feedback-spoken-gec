@@ -1,0 +1,17 @@
+run: 2026-11-10_B1_dev
+stage: B1
+mode: asr   # asr = official Whisper-small transcript; fluent = manual fluent STM, DD skipped
+dataset: dev
+corpus_root: $CORPUS_DIR
+flist: reference-materials/flists.flac/dev-gec.tsv
+input: reference-materials/pre-norm/dev-gec.ctm
+task_input: baseline-pipeline/run-scripts/run-asr-to-task-input.sh --task gec (official, unmodified)
+dd: sandi-models/dd/dd_model via run-gec.sh (env sandi-dd, x86_64 under Rosetta 2)
+gec: sandi-models/gec/gec_model with gec-plus-align.py (batch_size 32, num_beams 5, max_new_tokens 128, max_length 128), CPU
+scoring:
+  wer: scoring-tools/run-scripts/run-wer-scoring.sh --stm reference-materials/stms/dev-gec.stm
+  sgecf: scoring-tools/run-scripts/run-sgecf-scoring.sh --edit_detail --flt_stm reference-materials/stms/dev-fluent.stm --gec_stm reference-materials/stms/dev-gec.stm
+seed: none (no random process; beam search and all scripts are deterministic)
+corpus_out_dir: stageB/B1_dev
+command: cd $CORPUS_DIR && caffeinate -i bash $SCRIPTS_DIR/b_pipeline.sh asr dev reference-materials/flists.flac/dev-gec.tsv stageB/B1_dev > stageB/B1_dev.log 2>&1
+collect: bash $SCRIPTS_DIR/b_collect.sh asr 2026-11-10_B1_dev stageB/B1_dev stageB/B1_dev.log

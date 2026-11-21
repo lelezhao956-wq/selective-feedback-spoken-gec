@@ -1,0 +1,41 @@
+# EVAL ANALYSIS PLAN SUPPLEMENT — written 2026-11-10 09:54:30 +08, BEFORE any eval output exists (no eval pipeline run, no eval labels,
+# no eval features). Complements 03_configs/2026-11-10_C_plan.yaml and 03_configs/final.yaml. Requested by the user after the
+# C6 checkpoint. In the paper: comparisons 2 and 3 were added after the cross-validation results were known and before eval.
+prespecified_eval_comparisons:   # paired, 1000 submission-grouped bootstrap resamples of eval, seed 20261110, two-sided percentile p
+  1: risk_lgbm vs asr_conf        # original plan
+  2: risk_lgbm vs gec_lr          # added after CV, before eval
+  3: risk_lr vs gec_lr            # added after CV, before eval; same model class -> gain from the features, not the model type
+  secondary: [risk_lgbm vs asr_lr, risk_lr vs asr_conf]
+  metrics: [AURC, precision and FFR at coverage 0.3/0.5/0.7/0.9, AUROC, AUPRC, F0.5@0.5, max F0.5]
+risk_lr_final:
+  description: LR on all feature groups, tuned with the plan's inner scheme on all train+dev (GroupKFold 3, AUROC)
+  params: {"C": 1}
+  inner_auc_train_dev: "[corpus-derived value omitted; see the paper]"
+  artifact: 05_runs/2026-11-10_C6_final/risk_lr.pkl
+  artifact_sha256: 78b7981781df8141e9076d29dfadb3f4bc9378805d2a2e470fb1f0f56fa7087e
+operating_points:   # chosen on the pooled train+dev OOF scores; applied unchanged to the eval scores of the final models
+  rule: show an edit iff risk <= threshold
+  a_coverage_0.5: OOF 0.5 quantile of the risk scores
+  b_ffr_le_0.30: highest threshold (largest coverage) whose OOF false-feedback rate among shown edits is <= 0.30
+    # interpretation of "the risk threshold at which OOF FFR <= 30%"; a literally lowest threshold would be degenerate
+  note: OOF scores come from the five fold models, eval scores from the final refit, so eval coverage/FFR at a fixed threshold
+        can differ from the OOF values; this is reported, not corrected.
+  thresholds:
+    risk_lgbm: {a_coverage_0.5: "[corpus-derived value omitted; see the paper]", b_ffr_le_0.30: "[corpus-derived value omitted; see the paper]"}   # primary
+    risk_lr:   {a_coverage_0.5: "[corpus-derived value omitted; see the paper]", b_ffr_le_0.30: "[corpus-derived value omitted; see the paper]"}
+    gec_lr:    {a_coverage_0.5: "[corpus-derived value omitted; see the paper]", b_ffr_le_0.30: "[corpus-derived value omitted; see the paper]"}
+  oof_values:
+    risk_lgbm: "[corpus-derived value omitted; see the paper]"
+    risk_lr:   "[corpus-derived value omitted; see the paper]"
+    gec_lr:    "[corpus-derived value omitted; see the paper]"
+  eval_report: actual coverage, precision, FFR, F0.5 (recall over all eval reference edits), with bootstrap CIs
+calibration:
+  metrics: Brier score; ECE with 10 equal-width bins on [0, 1], weighted by bin size (FP = positive class)
+  models: [risk_lgbm, risk_lr, gec_lr, asr_lr, type_prior]   # asr_conf is not a probability
+  oof_train_dev: "[corpus-derived value omitted; see the paper]"
+  eval: reported by c7_eval.py
+per_cause_on_eval:
+  labels: B1 eval labels v4 (markup-free reference V), primary definition (literal as sensitivity)
+  report: AUROC of each method for asr- / dd- / gec-induced FP vs all TP; share of each cause's FP withheld at coverage 0.5
+          and at both operating points; share of TP withheld
+code_fixed_before_eval: 04_scripts/c7_eval.py (sha256 recorded in the commit), 04_scripts/c7_driver.sh

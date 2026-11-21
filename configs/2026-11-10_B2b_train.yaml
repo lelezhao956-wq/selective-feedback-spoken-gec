@@ -1,0 +1,17 @@
+run: 2026-11-10_B2b_train
+stage: B2b
+mode: verbatim   # manual verbatim transcript (stms/train-asr.stm) + real DD + GEC
+dataset: train
+corpus_root: $CORPUS_DIR
+flist: reference-materials/flists.flac/train-gec.tsv
+input: reference-materials/stms/train-asr.stm -> 04_scripts/stm_to_ctm.py --phrase_unit segment --drop_in_ignore_of reference-materials/stms/train-fluent.stm
+task_input: baseline-pipeline/run-scripts/run-asr-to-task-input.sh --task gec (official, unmodified)
+dd: sandi-models/dd/dd_model via run-gec.sh (env sandi-dd, x86_64 under Rosetta 2)
+gec: sandi-models/gec/gec_model with gec-plus-align.py (batch_size 32, num_beams 5, max_new_tokens 128, max_length 128), CPU
+scoring:
+  wer: scoring-tools/run-scripts/run-wer-scoring.sh --stm reference-materials/stms/train-gec.stm
+  sgecf: scoring-tools/run-scripts/run-sgecf-scoring.sh --edit_detail --flt_stm reference-materials/stms/train-fluent.stm --gec_stm reference-materials/stms/train-gec.stm
+seed: none (no random process)
+corpus_out_dir: stageB/B2b_train
+command: cd $CORPUS_DIR && caffeinate -i bash $SCRIPTS_DIR/b_pipeline2.sh verbatim train reference-materials/flists.flac/train-gec.tsv stageB/B2b_train > stageB/B2b_train.log 2>&1
+collect: bash $SCRIPTS_DIR/b_collect.sh verbatim 2026-11-10_B2b_train stageB/B2b_train stageB/B2b_train.log

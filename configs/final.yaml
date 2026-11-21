@@ -1,0 +1,71 @@
+# FROZEN 2026-11-10 (C6). Final configuration for the single eval run (C7). Do not edit after this commit;
+# any change must go to a new file and be recorded in 09_lab_notebook.md.
+# Plan: 03_configs/2026-11-10_C_plan.yaml (pre-registered); deviations listed under 'deviations_from_plan'.
+system_under_test: B1 = official S&I 2025 baseline (Whisper-small pre-norm CTM -> official DD -> official BART GEC), unchanged
+labels:
+  target: false_feedback (official SGECF matching, b3_edit_labels.py v3 logic)
+  attribution: labels v4 = v3 definitions with the markup-free manual verbatim reference V (stm_to_ctm.py --drop_markup)
+  primary_asr_err: excludes ASR omissions of disfluencies (literal = sensitivity)
+eval_procedure_C7:
+  1: b_pipeline2.sh asr eval reference-materials/flists.flac/eval-gec.tsv stageB/B1_eval  (official pipeline; scoring with eval STMs)
+  2: b_norm_verbatim.sh eval reference-materials/flists.flac/eval-gec.tsv stageB/norm_verbatim_v4_eval --drop_markup
+  3: b3_edit_labels.py --run_dir stageB/B1_eval --ds eval --mode asr --verbatim_norm_ctm stageB/norm_verbatim_v4_eval/gec/norm/gec.ctm
+  4: c1_bart_score.py --run_dir stageB/B1_eval ; c1_features.py --ds eval (same verification checks, exit 3 on failure)
+  5: score eval edits with the frozen artifacts below (no refitting, no tuning); compute the endpoints once
+features: ["asr_conf_o_min", "asr_conf_o_mean", "asr_conf_win_min", "asr_conf_win_mean", "asr_conf_ctx2_min", "asr_dur_win_min", "asr_dur_o_mean", "utt_asr_conf_mean", "utt_asr_conf_min", "utt_asr_lowconf_frac", "utt_rate_wps", "dd_del_inside", "dd_del_adjacent", "dd_del_conf_min", "utt_dd_del_rate", "gec_copy_lp_o_mean", "gec_copy_lp_o_min", "gec_copy_lp_win_min", "gec_lp_c_mean", "gec_lp_c_min", "gec_ent_c_mean", "gec_agree_c_all", "gec_lp_next", "gec_ent_next", "gec_lp_ratio", "phrase_lp_per_word", "phrase_copy_gap_per_word", "op", "type_pos", "part", "o_len", "c_len", "n_src_tokens", "rel_pos", "n_edits_utt", "phrase_len_words", "edit_at_phrase_edge", "utt_words"]
+risk_model:
+  kind: lightgbm
+  params: {"learning_rate": 0.05, "subsample": 0.8, "subsample_freq": 1, "colsample_bytree": 0.8, "random_state": 20261110, "deterministic": true, "force_row_wise": true, "num_leaves": 7, "n_estimators": 100, "min_child_samples": 20}
+  categorical_levels: {"op": ["M", "R", "U"], "type_pos": ["ADJ", "ADJ:FORM", "ADV", "CONJ", "CONTR", "DET", "MORPH", "NOUN", "NOUN:INFL", "NOUN:NUM", "NOUN:POSS", "ORTH", "OTHER", "PART", "PREP", "PRON", "PUNCT", "SPELL", "VERB", "VERB:FORM", "VERB:INFL", "VERB:SVA", "VERB:TENSE", "WO"], "part": ["P1", "P3", "P4", "P5"]}
+  artifact: 05_runs/2026-11-10_C6_final/risk_lgbm.txt
+  inner_cv_auroc_on_train_dev: "[corpus-derived value omitted; see the paper]"
+baselines:
+  asr_conf: {risk: 1 - min Whisper confidence over edit window +-1 token, missing -> 0.74 (train+dev median)}
+  asr_lr: {params: {"C": 10}, artifact: 05_runs/2026-11-10_C6_final/asr_lr.pkl}
+  gec_lr: {params: {"C": 1}, artifact: 05_runs/2026-11-10_C6_final/gec_lr.pkl}
+  type_prior: 05_runs/2026-11-10_C6_final/type_prior.json
+  random: {seed: 20261110}
+endpoints:
+  primary: [AURC, precision at coverage 0.5]                    # as pre-registered
+  main_reported: [precision and false-feedback rate (1 - precision) at coverage 0.3/0.5/0.7/0.9, AURC]
+  secondary: [F0.5 at coverage 0.5, max F0.5, AUROC, AUPRC]
+  comparisons: [risk_lgbm vs asr_conf (planned), risk_lgbm vs gec_lr (unplanned, added 2026-11-10), risk_lgbm vs asr_lr (unplanned)]
+  inference: 1000 submission-grouped bootstrap resamples of eval, seed 20261110, paired two-sided percentile p
+operating_thresholds_from_train_dev_oof: "[corpus-derived value omitted; see the paper]"   # reported only; endpoints are coverage-based
+deviations_from_plan:
+  - comparisons vs gec_lr and asr_lr added after the plan (user request); marked unplanned everywhere
+  - false-feedback rate (= 1 - precision) reported as a main metric next to precision; F0.5 secondary (already secondary in the plan)
+  - labels v4 (markup-free reference V) used for cause attribution; target false_feedback unaffected
+  - unplanned analyses: AUROC per FP cause; paired bootstrap of feature-group ablations
+software: {"lightgbm": "4.5.0", "sklearn": "1.5.2", "numpy": "1.26.4", "pandas": "2.2.3"}
+artifact_sha256: {"risk_lgbm.txt": "bb985c9832356f8710fc871b63ff2c7cd7d4138a01be5fd6723ebb52c19e3048", "gec_lr.pkl": "ef6d24ea00c123d26f5b1eefca666d82cf61e8adc2a69e53d750b299ad37b14b", "asr_lr.pkl": "e9b8780a1883a91fd56186c30c138ff0211eb3f35987bac35333321a8a179cea", "type_prior.json": "f52df484e8e339bdd5932ce7c922be4a2c14f719ae993a66d9580aa18ff17b7d"}
+script_sha256: {"c1_bart_score.py": "7f231cf1101a13cf243a6f94301c1f03352ab7bfac1727f915154e533bcd49af", "c1_features.py": "2d397750ce1e1b8422f454aa178759188ad8cc5795d43601451432dd412f282a", "c_model.py": "0c6f2e89a8c760690d37f796247a2c0f719d7534754d671ea78dbf308c472ecf", "c6_final.py": "84ef236ccfb043f07a6b0390ab732aa8476fbb4d639ae1b9867ede96fda3731e", "b3_edit_labels.py": "6656ac13f4661a6e787fa79aa461d8e9b9707c7a2b27123fbd0221be398609b8", "stm_to_ctm.py": "4bce789256e5ad4801a1f579f08f6adda36db88b4240c4f2e412df4fda322d33", "b_norm_verbatim.sh": "3ee0aa56984305b7a915e3ab7041b2330aa612cf80b1c0e90ae83f855d1a7f94", "b_pipeline2.sh": "f2b946071ec38463d857cc323db95a857ad4e759467d90ddd0a290f93ef02cda"}
+
+# ---- ADDENDUM 2026-11-10 09:54:30 +08 (before eval; user request after C6 checkpoint). Details: 03_configs/2026-11-10_eval_plan_supplement.yaml
+addendum_before_eval:
+  prespecified_comparisons: [risk_lgbm vs asr_conf (planned), risk_lgbm vs gec_lr (added after CV), risk_lr vs gec_lr (added after CV)]
+  risk_lr: {params: {"C": 1}, artifact: 05_runs/2026-11-10_C6_final/risk_lr.pkl, sha256: 78b7981781df8141e9076d29dfadb3f4bc9378805d2a2e470fb1f0f56fa7087e}
+  operating_thresholds:
+    risk_lgbm: {coverage_0.5: "[corpus-derived value omitted; see the paper]", ffr_le_0.30: "[corpus-derived value omitted; see the paper]"}
+    risk_lr: {coverage_0.5: "[corpus-derived value omitted; see the paper]", ffr_le_0.30: "[corpus-derived value omitted; see the paper]"}
+    gec_lr: {coverage_0.5: "[corpus-derived value omitted; see the paper]", ffr_le_0.30: "[corpus-derived value omitted; see the paper]"}
+  calibration: "Brier and ECE (10 bins), on OOF and eval"
+  per_cause_eval: AUROC and withheld share per FP cause (primary v4; literal sensitivity)
+
+# ---- POST-FREEZE NOTE 2026-11-12 (after the eval and after the reproduction audit, docs/AUDIT_REPORT.md).
+# Nothing above was changed. The script_sha256 values above identify the frozen versions that produced every result; the
+# distributed scripts differ from them only as listed here (full diffs: configs/post_freeze_changes.md).
+post_freeze_notes:
+  b3_edit_labels.py:
+    - "2026-11-11 (commit e14da3c): the label script's SELF-CHECK now computes P/R/F0.5 with the official compute_p_r_f05
+       instead of a re-implementation (float operation order changed a %.3f tie in one Q-dev per-type value, so the self-check
+       failed although the labels were right). Labelling logic and outputs unchanged: B1 and W labels re-generated byte-identical
+       (author, 2026-11-11). frozen 6656ac13... -> 7c92cbd8..."
+    - "2026-11-12: path constant (CORPUS) read from RUN_DIR / CORPUS_DIR instead of a hard-coded local path; usage comment. -> a9063d27..."
+  c1_features.py: ["2026-11-12: path constant (CORPUS) from RUN_DIR / CORPUS_DIR. 2d397750... -> 4c65fb4f..."]
+  c_model.py: ["2026-11-12: path constant (EXP) from EXP_DIR, default the parent of the scripts directory. 0c6f2e89... -> f044045f..."]
+  b_pipeline2.sh: ["2026-11-12: two comment lines only (no hard-coded paths). f2b94607... -> a70db7a5..."]
+  unchanged: [c1_bart_score.py, c6_final.py, stm_to_ctm.py, b_norm_verbatim.sh]
+  independent_check: "Reproduction audit (pre-submission, AI-assisted; see docs/AUDIT_REPORT.md; 2026-11-11, frozen-version scripts with only path constants redirected): B1 dev/train/eval
+       labels, label statistics (all cells), OOF metrics, the five frozen-model sha256 above and the C7 eval results identical to
+       results/ (max abs diff 0). The 2026-11-12 path-only versions re-run C2-C6: see configs/post_freeze_changes.md."

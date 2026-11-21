@@ -1,0 +1,46 @@
+# Stage C analysis plan, written BEFORE any model was fitted or any CV result was seen (2026-11-10 ~09:50).
+# Development data: B1 train + B1 dev hypothesis edits pooled (eval locked until C7).
+data:
+  edits: 05_runs/2026-11-10_C1_features/features_{train,dev}.csv   # one row per B1 hypothesis edit
+  target: false_feedback          # 1 = edit is FP under official SGECF matching
+  group: submission ID (first two dash fields of the file ID, e.g. SI114J-00011); the corpus has no speaker IDs
+         (SLaTE 2025 corpus paper: limited speaker metadata), a submission is one test session of one speaker
+  n_ref: reference edits per group from ref_edit_labels (needed for recall / F0.5 under selective feedback)
+cv:
+  scheme: StratifiedGroupKFold, 5 folds, shuffle, random_state 20261110 (outer; used for all of C2-C5)
+  tuning: nested, inner GroupKFold 3 folds inside each outer training fold, criterion inner pooled AUROC
+  predictions: pooled out-of-fold risk scores; all metrics computed on the pooled OOF predictions
+models:
+  lr: logistic regression; numeric median imputation + missing indicators + standardisation (fit in fold);
+      one-hot op / part / type_pos (type_pos categories with < 20 training edits -> infrequent); C in {0.01, 0.1, 1, 10}
+  lgbm: LightGBM binary; grid num_leaves {7, 15}, n_estimators {100, 300}, min_child_samples {20, 50},
+        learning_rate 0.05, subsample 0.8 (bagging_freq 1), colsample_bytree 0.8, seed 20261110, deterministic
+feature_groups:
+  ASR: Whisper word confidence (edit span, +-1 window, +-2 context, utterance mean/min/low-conf share), word durations, speaking rate
+  DD: pre-DD words deleted inside / adjacent to the window, their min confidence, utterance deletion rate
+  GEC: BART teacher-forced log-prob/entropy/greedy agreement of the edit's output words and the next word, copy log-prob of
+       the source words, output-vs-copy log-prob difference, phrase-level per-word log-prob and copy gap
+  EDIT: op (M/R/U), ERRANT type (POS part), test part, o_len, c_len, utterance/phrase length, relative position,
+        phrase-edge flag, number of edits in the utterance
+baselines:
+  asr_conf: risk = 1 - min Whisper confidence over the edit window (+-1 token); no fitting (main baseline)
+  asr_lr: model fitted on the ASR group only
+  gec_lr: model fitted on the GEC group only
+  type_prior: FP rate of the ERRANT type in the training fold (additive smoothing, alpha 1 toward the fold mean)
+  random: uniform random scores, seed 20261110
+selective_feedback:
+  rule: show the edits with the lowest risk until coverage c (share of system edits shown)
+  precision(c) = TP_shown / shown; recall(c) = TP_shown / n_ref (all reference edits of the data); F0.5 as in SGECF
+endpoints:
+  primary:
+    - AURC (area under the selective-risk vs coverage curve; risk = FP share among shown edits), lower is better
+    - precision at coverage 0.5
+  secondary: F0.5 at coverage 0.5; max F0.5 over coverage and its coverage; AUROC and AUPRC (FP as positive);
+             precision and F0.5 at coverage 0.3, 0.7, 0.9
+comparison: risk model (best of lr / lgbm by OOF AUROC, chosen before the bootstrap) vs asr_conf
+bootstrap: 1000 resamples of groups with replacement, seed 20261110; OOF predictions fixed (no refitting);
+           95% percentile CIs; paired two-sided p = 2 * min(P(diff <= 0), P(diff >= 0)), diff = risk model - asr_conf
+ablations (C5): drop each feature group; single groups; lr vs lgbm; per test part; label-definition sensitivity
+                for the share of ASR-induced FP among withheld edits (primary vs literal)
+final_model: refit the chosen model and hyperparameters (tuned on all train+dev with the inner scheme) on all train+dev;
+             frozen in 03_configs/final.yaml before C7

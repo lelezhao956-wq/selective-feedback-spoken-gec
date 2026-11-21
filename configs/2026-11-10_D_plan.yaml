@@ -1,0 +1,70 @@
+# Stage D plan — written 2026-11-10 before any stage-D result (only speed tests in the scratch directory, not used for analysis).
+# STATUS: DRAFT pending user confirmation of the items marked OPEN; any later change goes to a dated addendum below.
+purpose: robustness of the risk-aware selective-feedback method to (D-ASR) a stronger ASR system and (D-GEC) a different GEC system
+seed: 20261110 (all random processes; Whisper temperature-fallback sampling: mx.random.seed(seed + file index))
+software: {mlx: 0.32.4, mlx-whisper: 0.4.2, mlx-lm: 0.32.2, env: eswa-d (conda-forge py3.11 + pip); modelling env eswa-c unchanged}
+models:
+  whisper: {repo: mlx-community/whisper-large-v3-mlx, revision: 49e6aa286ad60c14352c404340ded53710378a11, size_gb: 3.08}
+  llm: {repo: mlx-community/Qwen2.5-7B-Instruct-4bit, revision: c26a38f6a37d0a51b4e9a1eb3026530fa35d9fed, size_gb: 4.3}
+  network: downloaded 2026-11-10 12:14-12:25 over Wi-Fi (en0, macOS path not expensive/not cellular); queue runs offline (HF_HUB_OFFLINE=1, TRANSFORMERS_OFFLINE=1)
+D-ASR:
+  system: W = Whisper large-v3 (mlx) -> official DD -> official BART GEC (official code unchanged)
+  decoding (as close as possible to run-asr-decode.sh / whisper_transcribe.py): {language: en, word_timestamps: true, condition_on_previous_text: false,
+            no_speech_threshold: 0.6, suppress_blank: true, length_penalty: null, initial_prompt: null, fp16: true,
+            temperature_fallback: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0], compression_ratio_threshold: 2.4, logprob_threshold: -1.0}
+  OPEN_beam: "official beam_size 5 is NOT available in mlx-whisper 0.4.2 (NotImplementedError) -> greedy decoding; deviation, to be confirmed"
+  confidence: Whisper word probability -> CTM confidence column (official whisper_json.json_to_ctm_lines, unchanged)
+  ctm_check: d_ctm_check.py (6 fields, channel 1, times >= 0, conf in [0,1] with 2 decimals, IDs in flist, sorted, coverage vs official small CTM)
+  validation: official ASR WER flow (run-asr-to-task-input --task asr + run-wer-scoring) on dev-subset for large-v3 AND the official Whisper-small
+              pre-norm CTM (same files, same STM subset); repeated on dev/train/eval (gec-subset files)
+  scope: train, dev, eval gec subsets -> task input -> DD -> empty-phrase filter (b2b_filter_empty.py, no-op if none) -> GEC -> GEC WER + SGECF
+         -> labels v4 (b3_edit_labels.py, markup-free V) -> BART teacher-forced scores + features (c1_bart_score.py, c1_features.py; same verification)
+D-GEC:
+  system: Q = B1 up to DD (official Whisper-small CTM + official DD, outputs reused unchanged) -> Qwen2.5-7B-Instruct GEC
+  OPEN_prompt: "zero-shot minimal-edit prompt (04_scripts/d_llm_gec.py SYS), one call per phrase, greedy, max_tokens 2*words+20; to be confirmed"
+  postprocessing: lower-case, drop characters other than letters/digits/apostrophes (hyphen, slash -> space), first line; empty -> input unchanged (counted)
+  alignment: official gec-plus-align.py align_dataset() + its CTM writing (d_llm_align.py imports the official module); no 126-token splitting
+  OPEN_features: "GEC-group features = BART teacher-forced scores of the Qwen output (the same c1 features); Qwen's own token log-probs saved but
+                  not used as features unless confirmed (feature set stays the frozen final.yaml set)"
+  scope: train, dev, eval -> GEC WER + SGECF -> labels v4 -> features
+analyses (eval used once per system and analysis):
+  a_frozen: frozen C6 artifacts (03_configs/final.yaml) applied to the system's eval edits = c7_eval.py unchanged (no refitting) -> 06_results/D_{W,Q}_eval_frozen.json
+  b_retrain: stage-C procedure on the system's train+dev (c_model.py cv/evaluate, c6_final.py, c6b_addendum.py, run unchanged via d_model.py with the
+             data root redirected; selftest reproduces the C6 artifacts byte-identically from the B1 features) -> c7_eval.py once on the system's eval
+             -> 06_results/D_{W,Q}_eval_retrained.json
+  comparisons: as pre-specified for C7 (risk_lgbm vs asr_conf, risk_lgbm vs gec_lr, risk_lr vs gec_lr; secondary vs asr_lr), with the baselines
+               of the same system (frozen baselines in a, retrained baselines in b); same endpoints, 1000 grouped bootstrap, seed 20261110
+  descriptive: GEC WER, SGECF P/R/F0.5 of W and Q vs B1 on each set; ASR WER large-v3 vs small; FP-cause split of W and Q (labels v4)
+not_in_scope: Whisper medium (dropped by user); stage E
+execution:
+  queue: 04_scripts/d_queue.sh (sequential; chains W_dev, W_train, W_eval, Q_dev, Q_train, Q_eval, M), started/resumed only with d_resume.sh
+         = nohup caffeinate -ims bash d_queue.sh full > log 2>&1 & disown (no sudo, no pmset changes); check: d_check.sh
+  resume: per-step .done markers (finish time + sha256 of each product); unfinished products renamed *.partial-<time> (never deleted);
+          completed per-file Whisper JSONs / per-phrase LLM lines in partial dirs are copied and reused
+  failures: a failed step is recorded and its chain skipped; other chains continue
+  heartbeat: 05_runs/d_heartbeat.tsv every 5 min; STALLED flag after 30 min without progress (not killed)
+  rehearsal: dev-subset, with a manual kill and d_resume.sh, before the full run
+
+# ---- ADDENDUM 2026-11-10 14:20 +08 (user decisions after the estimate; W queue started 14:05 before this addendum, Q before any Q result)
+decisions_2026-11-10:
+  greedy_decoding: "ACCEPTED (user). Deviation: mlx-whisper 0.4.2 has no beam search -> greedy at T=0 (official: beam_size 5). Recorded in methods_notes.md."
+  asr_reporting: "large-v3 ASR WER with the official flow (run-asr-to-task-input --task asr + run-wer-scoring, STM subset of the decoded gec-subset files)
+                  on dev, train, eval, next to the official Whisper-small CTM on the same files; repetition/hallucination counts per GEC phrase
+                  (d_asr_stats.py): phrases with one word >= 4 times in a row (and >= 8), 2-4-word loops repeated >= 4 times, for large-v3, small and
+                  the manual verbatim reference (natural repetition rate)."
+  W_chain: "dev -> train -> eval -> M_W: (a) frozen C6 models on W eval (transfer test), (b) retrain on W train+dev, eval once (d_queue_w.sh)"
+  Q_prompt: "3-shot, self-written examples (not from the corpus; minimal edits, spoken style, lower case without punctuation), one call per phrase,
+             greedy. FROZEN = 04_scripts/d_qwen_prompt.py VERSION v3, prompt_id 217b5e7c61c1 (sha256 of [SYS, SHOTS], first 12 hex)."
+  Q_prompt_history: "v2 (3-shot, d_qwen_prompt_v2.py) failed the format check on dev-subset ([corpus-derived value omitted; see the paper]); one revision allowed by a
+             rule written before testing (notebook 14:15): v3 adds an explicit no-punctuation sentence. v3: dev-subset and random 300 dev phrases
+             (seed 20261110): [corpus-derived value omitted; see the paper] -> accepted. Zero-shot v1 (d_llm_gec.py.orig) used only for the speed test."
+  Q_dev_subset_test: "format errors, edits (ERRANT, b3 labels) of Qwen vs BART on the same dev-subset phrases, and dev-subset SGECF Q: [corpus-derived value omitted; see the paper];
+             B1: [corpus-derived value omitted; see the paper] (descriptive only)"
+  Q_hard_failures: "format-error rate > 5% (checked in every llm step: exit 7), rehearsal crash, label verification vs official scorer failing -> Q abandoned, W unaffected"
+  Q_features: "PRIMARY GEC-group features = Qwen's own teacher-forced token log-probs under the frozen prompt, computed as C1 does for BART
+             (d_qwen_score.py: per word sum/min log-prob, mean entropy, argmax agreement of the output; copy log-prob of the input; same JSONL schema ->
+             c1_features.py unchanged). GEC-only baseline = gec_lr on these features. SECONDARY variant: BART teacher-forced scores of the Q output
+             (c1_bart_score.py) -> features_bart -> separate retrain (06_results/D_Q_eval_retrained_bartfeat.json), labelled secondary."
+  Q_modelling: "retrain + CV + eval once only (no frozen-model transfer for Q): d_model.py retrain; same pre-specified comparisons and endpoints as C7"
+  Q_scheduling: "d_queue_q.sh profile Q starts automatically when the W queue process has ended (waits on queue_W.lock)"
+  rehearsals: "W_rehearsal 14:02 (dev-subset) passed; Q_rehearsal passed after fixes (pandas missing in eswa-d; v2 partial blocking v3 reuse; rc masking)"

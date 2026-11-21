@@ -1,0 +1,11 @@
+./baseline-pipeline/gec-tools/dd.py.orig
+./baseline-pipeline/gec-tools/gec-plus-align.py.orig
+./baseline-pipeline/run-scripts/run-asr-decode.sh.orig
+./baseline-pipeline/run-scripts/run-asr-to-task-input.sh.orig
+./baseline-pipeline/run-scripts/run-gec.sh.orig
+./baseline-pipeline/run-scripts/run-sla.sh.orig
+./baseline-pipeline/sla-tools/inference_sla.py.orig
+./check-pipeline.sh.orig
+./envs/sandi-all-env.sh.orig
+./envs/sandi-dd-env.sh.orig
+./scoring-tools/run-scripts/run-wer-scoring.sh.orig

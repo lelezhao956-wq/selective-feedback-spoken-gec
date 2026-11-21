@@ -1,0 +1,34 @@
+MIT License (applies to the code in scripts/; see the licence layers at the end of this file)
+
+Copyright (c) 2026 The authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
+(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Licence layers of this package
+1. Code (scripts/): MIT, as above. Exception: the few lines copied from the official S&I 2025 baseline that are listed in
+   docs/THIRD_PARTY_CODE.md remain with their owner and are not covered by the MIT licence.
+2. Documentation written by the authors (README.md, docs/, the text of configs/ and environment/): CC BY 4.0
+   (https://creativecommons.org/licenses/by/4.0/), except the corpus-derived statistics they quote (layer 3) and the third-party
+   lines in environment/patches/ (layer 4).
+3. results/ and all corpus-derived statistics wherever they appear (including numbers quoted in README.md, docs/ and configs/):
+   NO open licence is granted. Subject to the Speak & Improve Corpus 2025 licence; released subject to CUP&A approval
+   (requested 2026-11-11). See docs/DATA_LICENSE_NOTE.md.
+4. environment/patches/: diffs of the official S&I 2025 baseline (no licence stated; zero-context diffs with only the changed lines)
+   and build records of NIST SCTK 2.4.9 (public domain) / tranfilt 1.14. The third-party lines remain with their owners; only our
+   own added lines are CC BY 4.0 (environment/patches/README.md).
+GRECO-related scripts (g_greco_*.py, e_after_q.sh) import the separately obtained GPL-3.0 GRECO code at run time; running them
+together with GRECO is subject to the GPL-3.0.
+
+Not included, each under its own licence: GRECO code (GPL-3.0); the Speak & Improve Corpus 2025 and everything derived from it
+at the level of utterances or edits (labels, features, model outputs, trained models); the official S&I baseline code and models;
+the pretrained models.

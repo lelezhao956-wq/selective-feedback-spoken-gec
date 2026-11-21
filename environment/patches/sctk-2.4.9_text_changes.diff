@@ -1,0 +1,405 @@
+# Build record of NIST SCTK 2.4.9 (not to be applied). SCTK: "developed at the National Institute of Standards and Technology
+# by employees of the Federal Government ... not subject to copyright protection and is in the public domain" (SCTK DISCLAIMER).
+# Source: SCTK 2.4.9 as shipped in the official scoring-tools.zip of the Speak & Improve Challenge 2025 (also github.com/usnistgov/SCTK).
+# The diff mainly shows files that `make` regenerated (config.log, config.status, makefiles).
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/acomp/makefile sctk-2.4.9/src/acomp/makefile
+--- sctk-2.4.9.orig/src/acomp/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/acomp/makefile	2026-11-09 23:26:21
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ PERL=/slp/sware/Linux/bin/perl
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/align2html/makefile sctk-2.4.9/src/align2html/makefile
+--- sctk-2.4.9.orig/src/align2html/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/align2html/makefile	2026-11-09 23:26:22
+@@ -1,5 +1,5 @@
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ 
+ all: align2html.pl
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/chfilt/makefile sctk-2.4.9/src/chfilt/makefile
+--- sctk-2.4.9.orig/src/chfilt/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/chfilt/makefile	2026-11-09 23:26:21
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/csrfilt/makefile sctk-2.4.9/src/csrfilt/makefile
+--- sctk-2.4.9.orig/src/csrfilt/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/csrfilt/makefile	2026-11-09 23:26:21
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/ctmValidator/makefile sctk-2.4.9/src/ctmValidator/makefile
+--- sctk-2.4.9.orig/src/ctmValidator/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/ctmValidator/makefile	2026-11-09 23:26:22
+@@ -1,5 +1,5 @@
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ 
+ all: ctmValidator.pl
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/def_art/makefile sctk-2.4.9/src/def_art/makefile
+--- sctk-2.4.9.orig/src/def_art/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/def_art/makefile	2026-11-09 23:26:21
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ PERL=/slp/sware/Linux/bin/perl
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/hamzaNorm/makefile sctk-2.4.9/src/hamzaNorm/makefile
+--- sctk-2.4.9.orig/src/hamzaNorm/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/hamzaNorm/makefile	2026-11-09 23:26:21
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/hubscr/makefile sctk-2.4.9/src/hubscr/makefile
+--- sctk-2.4.9.orig/src/hubscr/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/hubscr/makefile	2026-11-09 23:26:21
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ PERL=/slp/sware/Linux/bin/perl
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/md-eval/makefile sctk-2.4.9/src/md-eval/makefile
+--- sctk-2.4.9.orig/src/md-eval/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/md-eval/makefile	2026-11-09 23:26:22
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/mergectm2rttm/makefile sctk-2.4.9/src/mergectm2rttm/makefile
+--- sctk-2.4.9.orig/src/mergectm2rttm/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/mergectm2rttm/makefile	2026-11-09 23:26:22
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/rttm2ctm/makefile sctk-2.4.9/src/rttm2ctm/makefile
+--- sctk-2.4.9.orig/src/rttm2ctm/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/rttm2ctm/makefile	2026-11-09 23:26:22
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/rttmSmooth/makefile sctk-2.4.9/src/rttmSmooth/makefile
+--- sctk-2.4.9.orig/src/rttmSmooth/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/rttmSmooth/makefile	2026-11-09 23:26:22
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/rttmSort/makefile sctk-2.4.9/src/rttmSort/makefile
+--- sctk-2.4.9.orig/src/rttmSort/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/rttmSort/makefile	2026-11-09 23:26:22
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/rttmValidator/makefile sctk-2.4.9/src/rttmValidator/makefile
+--- sctk-2.4.9.orig/src/rttmValidator/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/rttmValidator/makefile	2026-11-09 23:26:22
+@@ -1,5 +1,5 @@
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ 
+ all: rttmValidator.pl
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/slatreport/makefile sctk-2.4.9/src/slatreport/makefile
+--- sctk-2.4.9.orig/src/slatreport/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/slatreport/makefile	2026-11-09 23:26:22
+@@ -2,7 +2,7 @@
+ # Makefile for slatreport Directory
+ # **********************************************************
+ MAKE=make
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir=$(PREFIX)/bin
+ 
+ all: slatreport.pl
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/spkr2sad/makefile sctk-2.4.9/src/spkr2sad/makefile
+--- sctk-2.4.9.orig/src/spkr2sad/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/spkr2sad/makefile	2026-11-09 23:26:22
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/stm2rttm/makefile sctk-2.4.9/src/stm2rttm/makefile
+--- sctk-2.4.9.orig/src/stm2rttm/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/stm2rttm/makefile	2026-11-09 23:26:22
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/stmValidator/makefile sctk-2.4.9/src/stmValidator/makefile
+--- sctk-2.4.9.orig/src/stmValidator/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/stmValidator/makefile	2026-11-09 23:26:22
+@@ -1,6 +1,6 @@
+ 
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ 
+ all: stmValidator.pl
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/tanweenFilt/makefile sctk-2.4.9/src/tanweenFilt/makefile
+--- sctk-2.4.9.orig/src/tanweenFilt/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/tanweenFilt/makefile	2026-11-09 23:26:21
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ T=../test_suite
+ 
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/utf_filt/config.log sctk-2.4.9/src/utf_filt/config.log
+--- sctk-2.4.9.orig/src/utf_filt/config.log	2026-11-09 23:26:16
++++ sctk-2.4.9/src/utf_filt/config.log	2026-11-09 23:26:22
+@@ -4,33 +4,50 @@
+ It was created by config.sh, which was
+ generated by GNU Autoconf 2.59.  Invocation command line was
+ 
+-  $ config.sh -prefix=./scoring-tools/wer-tools/sctk-2.4.9
++  $ config.sh -prefix=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ 
+ ## --------- ##
+ ## Platform. ##
+ ## --------- ##
+ 
+-hostname = cloud
+-uname -m = x86_64
+-uname -r = 3.2.0-72-generic
+-uname -s = Linux
+-uname -v = #107-Ubuntu SMP Thu Nov 6 14:24:01 UTC 2014
++hostname = USERdeMacBook-Pro.local
++uname -m = arm64
++uname -r = 25.5.0
++uname -s = Darwin
++uname -v = Darwin Kernel Version 25.5.0: Mon Apr 27 20:41:12 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T6050
+ 
+-/usr/bin/uname -p = unknown
++/usr/bin/uname -p = arm
+ /bin/uname -X     = unknown
+ 
+ /bin/arch              = unknown
+ /usr/bin/arch -k       = unknown
+ /usr/convex/getsysinfo = unknown
+-hostinfo               = unknown
++hostinfo               = Mach kernel version:
++	 Darwin Kernel Version 25.5.0: Mon Apr 27 20:41:12 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T6050
++Kernel configured for up to 15 processors.
++15 processors are physically available.
++15 processors are logically available.
++Processor type: arm64e (ARM64E)
++Processors active: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
++Primary memory available: 24.00 gigabytes
++Default processor set: 882 tasks, 4545 threads, 15 processors
++Load average: 3.46, Mach factor: 11.58
+ /bin/machine           = unknown
+ /usr/bin/oslevel       = unknown
+ /bin/universe          = unknown
+ 
+-PATH: /bin
++PATH: $HOME/.local/bin
++PATH: $HOME/.local/bin
++PATH: /usr/local/bin
++PATH: /System/Cryptexes/App/usr/bin
+ PATH: /usr/bin
++PATH: /bin
+ PATH: /usr/sbin
+-PATH: /fakehomedir/bin
++PATH: /sbin
++PATH: /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin
++PATH: /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin
++PATH: /var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin
++PATH: /pkg/env/global/bin
+ 
+ 
+ ## ----------- ##
+@@ -56,7 +73,7 @@
+   CONFIG_COMMANDS = 
+   $ ./config.status 
+ 
+-on cloud
++on USERdeMacBook-Pro.local
+ 
+ config.status:625: creating makefile
+ 
+@@ -76,8 +93,7 @@
+ ## ----------------- ##
+ 
+ DEFS='-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" '
+-ECHO_C=''
+-ECHO_N='-n'
++ECHO_C='ECHO_N=''
+ ECHO_T=''
+ LIBOBJS=''
+ LIBS=''
+@@ -89,7 +105,7 @@
+ PACKAGE_TARNAME=''
+ PACKAGE_VERSION=''
+ PATH_SEPARATOR=':'
+-SHELL='/bin/bash'
++SHELL='/bin/sh'
+ bindir='${exec_prefix}/bin'
+ build_alias=''
+ datadir='${prefix}/share'
+@@ -102,7 +118,7 @@
+ localstatedir='${prefix}/var'
+ mandir='${prefix}/man'
+ oldincludedir='/usr/include'
+-prefix='./scoring-tools/wer-tools/sctk-2.4.9'
++prefix='$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9'
+ program_transform_name='s,x,x,'
+ sbindir='${exec_prefix}/sbin'
+ sharedstatedir='${prefix}/com'
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/utf_filt/config.status sctk-2.4.9/src/utf_filt/config.status
+--- sctk-2.4.9.orig/src/utf_filt/config.status	2026-11-09 23:26:16
++++ sctk-2.4.9/src/utf_filt/config.status	2026-11-09 23:26:21
+@@ -1,4 +1,4 @@
+-#! /bin/bash
++#! /bin/sh
+ # Generated by config.sh.
+ # Run this file to recreate the current configuration.
+ # Compiler output produced by configure, useful for debugging
+@@ -7,7 +7,7 @@
+ debug=false
+ ac_cs_recheck=false
+ ac_cs_silent=false
+-SHELL=${CONFIG_SHELL-/bin/bash}
++SHELL=${CONFIG_SHELL-/bin/sh}
+ ## --------------------- ##
+ ## M4sh Initialization.  ##
+ ## --------------------- ##
+@@ -294,7 +294,7 @@
+ ac_cs_version="\
+ config.status
+ configured by config.sh, generated by GNU Autoconf 2.59,
+-  with options \"'-prefix=./scoring-tools/wer-tools/sctk-2.4.9'\"
++  with options \"'-prefix=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9'\"
+ 
+ Copyright (C) 2003 Free Software Foundation, Inc.
+ This config.status script is free software; the Free Software Foundation
+@@ -372,8 +372,8 @@
+ fi
+ 
+ if $ac_cs_recheck; then
+-  echo "running /bin/bash config.sh " '-prefix=./scoring-tools/wer-tools/sctk-2.4.9' $ac_configure_extra_args " --no-create --no-recursion" >&6
+-  exec /bin/bash config.sh '-prefix=./scoring-tools/wer-tools/sctk-2.4.9' $ac_configure_extra_args --no-create --no-recursion
++  echo "running /bin/sh config.sh " '-prefix=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9' $ac_configure_extra_args " --no-create --no-recursion" >&6
++  exec /bin/sh config.sh '-prefix=$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9' $ac_configure_extra_args --no-create --no-recursion
+ fi
+ 
+ for ac_config_target in $ac_config_targets
+@@ -431,7 +431,7 @@
+   # Protect against being on the right side of a sed subst in config.status.
+   sed 's/,@/@@/; s/@,/@@/; s/,;t t$/@;t t/; /@;t t$/s/[\\&,]/\\&/g;
+    s/@@/,@/; s/@@/@,/; s/@;t t$/,;t t/' >$tmp/subs.sed <<\CEOF
+-s,@SHELL@,/bin/bash,;t t
++s,@SHELL@,/bin/sh,;t t
+ s,@PATH_SEPARATOR@,:,;t t
+ s,@PACKAGE_NAME@,,;t t
+ s,@PACKAGE_TARNAME@,,;t t
+@@ -439,7 +439,7 @@
+ s,@PACKAGE_STRING@,,;t t
+ s,@PACKAGE_BUGREPORT@,,;t t
+ s,@exec_prefix@,${prefix},;t t
+-s,@prefix@,./scoring-tools/wer-tools/sctk-2.4.9,;t t
++s,@prefix@,$CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9,;t t
+ s,@program_transform_name@,s,x,x,,;t t
+ s,@bindir@,${exec_prefix}/bin,;t t
+ s,@sbindir@,${exec_prefix}/sbin,;t t
+@@ -457,8 +457,8 @@
+ s,@host_alias@,,;t t
+ s,@target_alias@,,;t t
+ s,@DEFS@,-DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" ,;t t
+-s,@ECHO_C@,,;t t
+-s,@ECHO_N@,-n,;t t
++s,@ECHO_C@,\c,;t t
++s,@ECHO_N@,,;t t
+ s,@ECHO_T@,,;t t
+ s,@LIBS@,,;t t
+ s,@NSGMLS@,,;t t
+diff -ru -x *.o -x bin -x sclite -x sc_stats -x rover -x sctkUnit -x asclite -x asclite_test -x rfilter1 -x test_suite sctk-2.4.9.orig/src/utf_filt/makefile sctk-2.4.9/src/utf_filt/makefile
+--- sctk-2.4.9.orig/src/utf_filt/makefile	2026-11-09 23:26:16
++++ sctk-2.4.9/src/utf_filt/makefile	2026-11-09 23:26:22
+@@ -2,7 +2,7 @@
+ # Makefile for rfilter1 Directory
+ # **********************************************************
+ SHELL = /bin/sh
+-PREFIX=./scoring-tools/wer-tools/sctk-2.4.9
++PREFIX = $CORPUS_DIR/scoring-tools/wer-tools/sctk-2.4.9
+ bindir = $(PREFIX)/bin
+ NSGMLS = 
+ T=../test_suite

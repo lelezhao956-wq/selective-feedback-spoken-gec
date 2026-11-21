@@ -1,0 +1,47 @@
+# GRECO comparison — analysis-plan supplement. ADDED AFTER THE C7 EVAL (C7 eval_results.json, commit a90d1f1) and after the W chain;
+# written 2026-11-10 ~22:25 +08 before any GRECO score was computed (no GRECO weights on this machine at writing time).
+reference: "Qorib & Ng (2023), System Combination via Quality Estimation for Grammatical Error Correction, EMNLP 2023; github.com/nusnlp/greco"
+feasibility_check_2026-11-10_22:10:
+  code: "available: github.com/nusnlp/greco (GitHub API: GPL-3.0, last push 2026-01-24); models.py GRECO.score(sources, hyps) used unchanged"
+  weights: "available: huggingface.co/nusnlp/GRECO checkpoint/checkpoint.bin (1,748,823,771 bytes, LFS sha256 1a11360c12bdfb20660555fe1e4a71e28b4c21e0acd0b4077d8af80a8f096884);
+            base LM microsoft/deberta-v3-large (MIT; revision 64a8c8eab3e352a784c658aef62be1662607476f) -> ~2.6 GB in total"
+  licence: "GPL-3.0 for code and models (commercial use needs a separate licence) -> academic use allowed; we do not redistribute GRECO"
+  offline_mac: "PyTorch model (DeBERTa-v3-large + small heads); runs on CPU or MPS; needs a torch env (eswa-g, not yet created).
+                Repo requirements pin torch 1.12.1 / transformers 4.23.1 / tokenizers 0.13.1 / sentencepiece 0.1.97 (arm64 wheels exist for py3.10)"
+  network_2026-11-10_22:07: "after a network drop the Mac re-joined a different Wi-Fi (gateway 192.168.72.33, earlier 192.168.10.1); NWPath expensive=false
+                but the address pattern looks like a phone (Android) hotspot -> treated as a possible hotspot: NOTHING DOWNLOADED tonight
+                (user rule). Download, env creation and the dev-subset test are deferred to the next session on confirmed Wi-Fi."
+  decision: "feasible (code, weights, licence, offline Mac all satisfied in principle); execution deferred, not abandoned"
+per_edit_mapping (04_scripts/g_greco_score.py):
+  inputs: "official ERRANT input lines per utterance: S = system fluent source (flt_ctm.txt), G = GEC hypothesis (gec_ctm.txt); hypothesis
+           edits from labels v4 (o_start/o_end in S, c_start/c_end in G) = exactly the edits being labelled and ranked"
+  scores: "q = GRECO.score(src, hyp). greco_single = q(S, S+e) - q(S, S) (edit applied alone); greco_loo = q(S, G) - q(S, G-e) (edit reverted
+           inside the full hypothesis); greco_sent = q(S, G)"
+  text: "lower-case spoken transcripts without punctuation, as produced by the pipeline (no re-casing or punctuation restoration)"
+models (04_scripts/g_greco_model.py, eswa-c):
+  greco_zs: "GRECO-only zero-shot ranking: risk = -greco_single (no fitting)"
+  greco_lr: "GRECO-only LR on [greco_single, greco_loo, greco_sent] (c_model.lr_pipe, C in {0.01,0.1,1,10}, inner GroupKFold 3)"
+  risk_greco: "LightGBM on the frozen final.yaml feature set + the 3 GRECO scores; c_model LGB grid; nested grouped CV as C2 (same outer folds);
+               final fit tuned by inner CV on all train+dev; never tuned on eval"
+  risk_lgbm: "the system's existing final model (frozen artifacts), reference"
+prespecified_comparisons: [risk_lgbm vs greco_lr, risk_greco vs greco_lr]   # primary GRECO-only = greco_lr; greco_zs reported alongside
+secondary: [risk_lgbm vs greco_zs, risk_greco vs risk_lgbm]
+systems: [B1, W]     # eval of each scored once (06_results/G_<system>_eval.json must not exist before)
+endpoints: "as C7 (AURC and P@0.5 primary; FFR/precision at coverage 0.3/0.5/0.7/0.9; F0.5@0.5, maxF0.5, AUROC, AUPRC); 1000 submission-grouped
+            bootstrap, seed 20261110, paired two-sided percentile p"
+validation_before_full_run: "dev-subset (21 files): all edits scored, finite scores, token counts of S equal n_src_tokens of every edit,
+                             speed in s/edit -> full-run estimate; failure -> GRECO abandoned with the reason recorded"
+execution: "04_scripts/e_after_q.sh (nohup caffeinate -ims, nice 10) after the Q queue; GRECO steps run only if the env, the clone and the
+            checkpoint (sha256 above) are present, otherwise SKIPPED with the reason; resumable (scored rows kept)"
+amendment_2026-11-11:
+  written: "2026-11-11 ~08:27 +08, before any GRECO score was computed (checkpoint still downloading)"
+  Q_system: "Q 为 eval 之后追加 (Q added after the eval): the Q system (Qwen2.5-7B GEC; D_Q_eval_retrained.json already scored) is added as an
+             ADDITIONAL analysis with the same models, comparisons and endpoints as B1/W; its eval is scored once (06_results/GRECO_Q_eval.json)"
+  outputs: "06_results/GRECO_<system>_eval.json (file names carry GRECO; replaces G_<system>_eval.json; no G_* file was ever written)"
+  added_reporting: "operating points cov05/ffr30 (rule of c6b_addendum.thresholds on each model's OOF scores) with grouped-bootstrap CIs;
+                    AUROC per FP cause (asr/dd/gec, primary v4 + literal); GRECO scoring time per edit/utterance/pair"
+  scoring_detail: "the official GRECO.score() passes no attention mask, so batch padding would change scores; pairs are batched only with
+                   pairs of identical token length (no padding, equal to one-by-one scoring); model.device set to the run device
+                   (official score() hard-codes cpu/cuda); models.py unchanged. Verified on the dev-subset before the full run
+                   (bucketed vs batch-1, MPS vs CPU) and on the authors' public CoNLL-2014 example (re-rank vs released outputs)."
+  order: "per system: score train/dev/eval, then fit + eval once (B1, W, Q)"

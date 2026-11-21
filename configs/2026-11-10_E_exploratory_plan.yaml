@@ -1,0 +1,59 @@
+# Stage E plan — EXPLORATORY ANALYSES, ADDED AFTER THE C7 EVAL (eval_results.json, commit a90d1f1) AND AFTER THE W CHAIN
+# (D_W_eval_*.json, commit f7ea8c0). Written 2026-11-10 ~22:20 +08 before any stage-E number was computed.
+# Status: exploratory. Nothing here changes a frozen model, threshold, feature set, label or the pre-specified C7/D results;
+# no main model is retrained; eval is not used to choose anything. All results are marked "exploratory" in results_summary.md.
+seed: 20261110 (bootstrap, subsampling, tie-break as c_model.curve)
+inputs_only_existing_predictions:
+  scores: deterministic outputs of the frozen artifacts on the existing feature files (as c7b_posthoc_equal_precision.py;
+          regenerated eval scores are checked against the stored eval JSON point metrics to 1e-12 before use); OOF = stored oof_scores.csv
+  thresholds: stored OOF operating points (addendum_fit.json: cov05, ffr30) of the system's own final fit; never re-derived on eval
+systems:
+  B1: {eval: 05_runs/2026-11-10_C7_B1_eval/features, artifacts: 05_runs/2026-11-10_C6_final, oof: 05_runs/2026-11-10_C2_cv/oof_scores.csv,
+       train_dev: 05_runs/2026-11-10_C1_features, results: 06_results/eval_results.json}
+  W:  {eval: 05_runs/2026-11-10_D_W_eval/features, artifacts: 05_runs/2026-11-10_D_W_model/05_runs/2026-11-10_C6_final,
+       oof: 05_runs/2026-11-10_D_W_model/05_runs/2026-11-10_C2_cv/oof_scores.csv, train_dev: 05_runs/2026-11-10_D_W_model/features,
+       results: 06_results/D_W_eval_retrained.json}           # W retrained = W's own models (primary for W)
+  W_frozen: {eval: W eval features, artifacts/oof/thresholds: B1, results: 06_results/D_W_eval_frozen.json}   # items 1, 2, 6 only
+  Q:  {same layout under 05_runs/2026-11-10_D_Q_model, results: 06_results/D_Q_eval_retrained.json}  # added automatically after the Q chain
+models_analysed: [risk_lgbm (primary), risk_lr, gec_lr]; operating points cov05 and ffr30
+analyses:
+  E1_proficiency:
+    level: reference-materials/sla-marks/<ds>-sla-overall.tsv (overall score 0-6, mean of the 4 part marks; joined by submission ID = group)
+    grouping_rule: "CEFR band by nearest integer of the overall score (README: 2 A2, 3 B1, 4 B2, 5 C1); A2 is merged into B1 because it is
+                    small (eval: [corpus-derived value omitted; see the paper] edits with score < 3.0): LOW = score < 3.5 (A2/B1), MID = 3.5 <= score < 4.5 (B2), HIGH = score >= 4.5 (C1).
+                    Train submissions without an overall mark (incomplete; [corpus-derived value omitted; see the paper] of OOF edits) are reported as NO_MARK and excluded from the
+                    LOW-HIGH contrasts. Sensitivity: tertiles of the overall score (cut points from the train+dev submissions)."
+    per_band: [n_edits, n_submissions, FP rate, and for each model x operating point: coverage (shown share), withheld share,
+               precision and false-feedback rate of the shown edits, share of correct edits withheld, share of false edits withheld]
+    contrast: "LOW minus HIGH (withheld share; correct-edit withheld share; precision of shown), 1000 submission-grouped bootstrap, 95% CI, p"
+    data: eval (primary) and OOF train+dev (larger, secondary)
+  E2_holm:
+    families: "one family per system and eval analysis (B1 eval; W frozen; W retrained; Q retrained): the 3 pre-specified comparisons
+               (risk_lgbm vs asr_conf, risk_lgbm vs gec_lr, risk_lr vs gec_lr) x 2 primary endpoints (AURC, P@0.5) = 6 p-values.
+               Sensitivity family: the same 3 comparisons x all 13 reported endpoints."
+    p_values: "stored bootstrap p (1000 resamples). p = 0 means < 1/500 and is set to 0.002 before adjustment (conservative). Holm step-down,
+               alpha 0.05; report raw and adjusted p."
+  E3_shap:
+    method: "TreeSHAP of the final LightGBM (lightgbm Booster.predict(pred_contrib=True); exact, no sampling), on train+dev (fit data) and eval"
+    report: "mean |SHAP| per feature and summed per feature group (ASR, DD, GEC, EDIT); figure: top 15 features (07_figures/E3_shap_<system>.png)"
+  E4_utility:
+    definition: "per-edit utility of a selection policy = (correct edits shown - lambda x false edits shown) / n_edits; lambda = 0.5, 0.75, ..., 5"
+    policies: "show all; show none (0); per model: (a) Bayes rule with the model probability (show iff p_false < 1/(1+lambda)),
+               (b) threshold maximising the OOF utility, applied to eval; (c) oracle = best threshold on eval (upper reference only)"
+    inference: "risk_lgbm minus gec_lr and risk_lgbm minus show-all under (b), 1000 grouped bootstrap 95% CI at each lambda"
+    figure: 07_figures/E4_utility_<system>.png
+  E5_learning_curve:
+    design: "fractions 25/50/75/100% of training SUBMISSIONS (grouped sampling), 5 repeats (seeds SEED+rep), 100% once (deterministic);
+             hyper-parameters fixed to the system's final fit (no inner tuning); models risk_lgbm, risk_lr, gec_lr.
+             (i) within train+dev: the C2 outer folds (StratifiedGroupKFold 5, seed SEED), training part subsampled, pooled OOF metrics;
+             (ii) eval: fit on the subsample of all train+dev submissions, score eval (descriptive; these are not the main models)"
+    metrics: [AURC, P@0.5, AUROC]; figure: 07_figures/E5_learning_curve_<system>.png
+  E6_errant_type:
+    report: "per ERRANT type (types with >= 30 edits; the rest pooled as OTHER_SMALL) and per op/POS: n, FP rate, withheld share and
+             precision of the shown edits for risk_lgbm and gec_lr at cov05 and ffr30; eval and OOF"
+  E7_timing:
+    report: "feature-extraction time per edit from the logged step durations (teacher-forced scoring and c1_features; ASR/DD/GEC pipeline
+             time listed for context), and inference time per edit (median of 20 repeated predictions on eval, CPU) for each model.
+             Measured while the Q queue runs (nice 10), so timings are upper bounds."
+outputs: {results: 06_results/E_<system>_exploratory.json, figures: 07_figures/E*_<system>.png, script: 04_scripts/e_explore.py}
+execution: "nohup caffeinate -ims nice -n 10 (eswa-c env); the Q system is added automatically by 04_scripts/e_after_q.sh after the Q queue ends"

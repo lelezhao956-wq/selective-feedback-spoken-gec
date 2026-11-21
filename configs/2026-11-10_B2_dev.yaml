@@ -1,0 +1,18 @@
+run: 2026-11-10_B2_dev
+stage: B2
+mode: fluent   # asr = official Whisper-small transcript; fluent = manual fluent STM, DD skipped
+dataset: dev
+corpus_root: $CORPUS_DIR
+flist: reference-materials/flists.flac/dev-gec.tsv
+input: reference-materials/stms/dev-fluent.stm -> 04_scripts/stm_to_ctm.py --phrase_unit segment
+task_input: baseline-pipeline/run-scripts/run-asr-to-task-input.sh --task gec (official, unmodified)
+dd: skipped: 04_scripts/identity_dd.py writes dd.py-format files with all words kept
+gec: sandi-models/gec/gec_model with gec-plus-align.py (batch_size 32, num_beams 5, max_new_tokens 128, max_length 128), CPU
+scoring:
+  wer: scoring-tools/run-scripts/run-wer-scoring.sh --stm reference-materials/stms/dev-gec.stm
+  sgecf: scoring-tools/run-scripts/run-sgecf-scoring.sh --edit_detail --flt_stm reference-materials/stms/dev-fluent.stm --gec_stm reference-materials/stms/dev-gec.stm
+seed: none (no random process; beam search and all scripts are deterministic)
+corpus_out_dir: stageB/B2_dev
+command: cd $CORPUS_DIR && caffeinate -i bash $SCRIPTS_DIR/b_pipeline2.sh fluent dev reference-materials/flists.flac/dev-gec.tsv stageB/B2_dev > stageB/B2_dev.log 2>&1
+collect: bash $SCRIPTS_DIR/b_collect.sh fluent 2026-11-10_B2_dev stageB/B2_dev stageB/B2_dev.log
+note: run with b_pipeline2.sh (v2 = v1 + verbatim mode; asr/fluent branches identical). B1 dev used b_pipeline.sh (v1) because it was already running.
