@@ -291,6 +291,8 @@ post hoc. They are copied as run: the path constants at the top of each script p
 `common.py` also imports `c_model.py` from the research tree), so edit them before running. They read per-edit features, labels
 and frozen-model scores that are not distributed (corpus licence); their outputs (per-edit scores and aggregate JSON) are not
 included either.
+In `h_editconf.py` and `i_lu_proxy.py`, the variable `S1` originally pointed to an old folder on the authors' machine; to
+reproduce, set it to the `scripts/` directory of this repository.
 
 | script | role | manuscript |
 |---|---|---|
